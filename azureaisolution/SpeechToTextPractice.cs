@@ -29,41 +29,7 @@ namespace azureaisolution
 
                 // Source File
                 string audioFileInput = @"assets\speechtotext\time.wav";
-
-                // Input Source 
-                audioConfig = AudioConfig.FromWavFileInput(audioFileInput);
-
-                // This is not required and only for Demo purpose
-                //SoundPlayer wavPlayer = new(audioFileInput);
-                //wavPlayer.Play();
-
-                speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
-
-                speechRecognitionResult = await speechRecognizer.RecognizeOnceAsync();
-
-                if (speechRecognitionResult.Reason == ResultReason.RecognizedSpeech)
-                {
-                    Console.WriteLine("Text : " + speechRecognitionResult.Text);
-                    Console.WriteLine("Duration : " + speechRecognitionResult.Duration);
-                    Console.WriteLine("OffsetInTicks : " + speechRecognitionResult.OffsetInTicks);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-        }
-
-        public static async Task ConvertSpeechToText(string cogSvcKey, string cogSvcRegion)
-        {
-            try
-            {
-                // SpeechConfig is Required to connect to your Speech Resource
-                speechConfig = SpeechConfig.FromSubscription(cogSvcKey, cogSvcRegion);
-
-                // Source File
-                string audioFileInput = @"assets\speechtotext\time.wav";
+                //string audioFileInput = @"assets\speechtotext\tumhihowav.wav";
 
                 // Input Source 
                 audioConfig = AudioConfig.FromWavFileInput(audioFileInput);
@@ -99,5 +65,6 @@ namespace azureaisolution
             }
 
         }
+
     }
 }

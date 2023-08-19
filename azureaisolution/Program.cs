@@ -18,15 +18,14 @@ namespace azureaisolution
             LoadConfiguration();
             DisplayConfigurationValues();
 
-            var configurationIsValid = region != null && cogSvcEndpoint != null && cogSvcKey != null;
-
-            if (configurationIsValid)
+            if (region != null && cogSvcEndpoint != null && cogSvcKey != null)
             {
                 Console.WriteLine("Speech to Text Service");
                 await SpeechToTextPractice.ConvertWavFileSpeechToText(cogSvcKey, region);
             }
 
         }
+
         public static void LoadConfiguration()
         {
             IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
