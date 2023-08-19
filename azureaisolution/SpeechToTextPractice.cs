@@ -29,7 +29,6 @@ namespace azureaisolution
 
                 // Source File
                 string audioFileInput = @"assets\speechtotext\time.wav";
-                //string audioFileInput = @"assets\speechtotext\tumhihowav.wav";
 
                 // Input Source 
                 audioConfig = AudioConfig.FromWavFileInput(audioFileInput);
