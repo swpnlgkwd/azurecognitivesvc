@@ -12,14 +12,16 @@ using System.Threading.Tasks;
 namespace azureaisolution
 {
     // Responsible for handling Speech to Text Conversion
-    static class SpeechToTextPractice
+    static class SpeechServicePractice
     {
         // Speech to Text needs SpeechConfig and AudioConfig
         static SpeechConfig? speechConfig;
         static AudioConfig? audioConfig;
         static SpeechRecognizer? speechRecognizer;
         static SpeechRecognitionResult? speechRecognitionResult;
+        static SpeechSynthesizer? speechSynthesizer;
 
+        // Method Convert Speech to Text
         public static async Task ConvertWavFileSpeechToText(string cogSvcKey, string cogSvcRegion)
         {
             try
@@ -57,6 +59,32 @@ namespace azureaisolution
                         Console.WriteLine(cancellation.ErrorDetails);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+        }
+
+        // Method Convert Text to Speech
+        public static async Task ConvertTextToSpeech(string cogSvcKey, string cogSvcRegion)
+        {
+            try
+            {
+                // SpeechConfig is Required to connect to your Speech Resource
+                speechConfig = SpeechConfig.FromSubscription(cogSvcKey, cogSvcRegion);
+                speechConfig.SpeechSynthesisLanguage = "en-IN";
+                speechConfig.SpeechSynthesisVoiceName = "en-US-JennyNeural";
+
+                string outputFile = "speechsyn.wav";
+                audioConfig = AudioConfig.FromWavFileOutput(outputFile);
+
+                speechSynthesizer = new SpeechSynthesizer(speechConfig, audioConfig);
+                //await speechSynthesizer.SpeakTextAsync("I'm excited to try text to speech");
+                await speechSynthesizer.SpeakTextAsync("You plan to manually build headers based on factors like bit depth, sample rate, and number of channels.");
+                Console.WriteLine("Speech Synthesization Completed");
+
             }
             catch (Exception ex)
             {
