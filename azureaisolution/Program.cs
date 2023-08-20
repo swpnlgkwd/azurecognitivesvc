@@ -12,6 +12,20 @@ namespace azureaisolution
         private static string? cogSvcKey;
         private static string? region;
 
+        // Configuration for Clasify Image
+        private static string? classifyImagePredictionEndpoint;
+        private static string? classifyImagePredictionKey;
+        private static string? classifyImageModelName;
+        private static Guid classifyImageProjectID;
+
+        // Configuration for Detect Object
+        private static string? detectObjectPredictionEndpoint;
+        private static string? detectObjectPredictionKey;
+        private static string? detectObjectModelName;
+        private static Guid detectObjectProjectID;
+
+
+
         static async Task Main(string[] args)
         {
             // Load and Display Configuration
@@ -20,12 +34,13 @@ namespace azureaisolution
 
             if (region != null && cogSvcEndpoint != null && cogSvcKey != null)
             {
-                
+
                 while (true)
                 {
 
                     Console.WriteLine("Select Service to use - ");
                     Console.WriteLine("1. Speech Service");
+                    Console.WriteLine("2. Computer Vision Service");
                     int serviceType = Convert.ToInt32(Console.ReadLine());
                     switch (serviceType)
                     {
@@ -48,6 +63,40 @@ namespace azureaisolution
                                 case 2:
                                     Console.WriteLine("You Selected Text to Speech");
                                     await SpeechServicePractice.ConvertTextToSpeech(cogSvcKey, region);
+                                    break;
+                                default:
+                                    Console.WriteLine("Please enter valid number");
+                                    break;
+                            }
+                            break;
+
+                        case 2:
+                            Console.WriteLine("You Selected : Computer Vision Service...");
+                            Console.WriteLine();
+
+                            Console.WriteLine("Select Computer Vision Capability - ");
+                            Console.WriteLine("1. Analyze Images");
+                            Console.WriteLine("2. Classify Image");
+                            Console.WriteLine("3. Detect Object");
+
+
+                            int computerVisionCapability = Convert.ToInt32(Console.ReadLine());
+
+                            switch (computerVisionCapability)
+                            {
+                                case 1:
+                                    Console.WriteLine("You Selected : Analyzing Images");
+                                    await ComputerVisionPractice.AnalyseImage(cogSvcKey, cogSvcEndpoint);
+                                    break;
+                                case 2:
+                                    Console.WriteLine("You Selected : Classify Image");
+                                    await ComputerVisionPractice.GetPredictionsForImageAsync(classifyImagePredictionEndpoint,
+                                        classifyImagePredictionKey, classifyImageProjectID, classifyImageModelName);
+                                    break;
+                                case 3:
+                                    Console.WriteLine("You Selected : Detect Object");
+                                    await ComputerVisionPractice.DetectObjectsForImageAsync(detectObjectPredictionEndpoint,
+                                        detectObjectPredictionKey, detectObjectProjectID, detectObjectModelName);
                                     break;
                                 default:
                                     Console.WriteLine("Please enter valid number");
@@ -79,6 +128,18 @@ namespace azureaisolution
             cogSvcEndpoint = configuration["CognitiveServiceEndpoint"];
             cogSvcKey = configuration["CognitiveServiceKey"];
             region = configuration["CognitiveServiceRegion"];
+
+            // Configuration of Custom Vision
+            classifyImagePredictionEndpoint = configuration["ClassifyImagePredictionEndpoint"];
+            classifyImagePredictionKey = configuration["ClassifyImagePredictionKey"];
+            classifyImageProjectID = Guid.Parse(configuration["ClassifyImageProjectId"]);
+            classifyImageModelName = configuration["ClassifyImageModelName"];
+
+            detectObjectPredictionEndpoint = configuration["DetectObjectPredictionEndpoint"];
+            detectObjectPredictionKey = configuration["DetectObjectPredictionKey"];
+            detectObjectProjectID = Guid.Parse(configuration["DetectObjectProjectId"]);
+            detectObjectModelName = configuration["DetectObjectModelName"];
+
         }
 
         private static void DisplayConfigurationValues()
