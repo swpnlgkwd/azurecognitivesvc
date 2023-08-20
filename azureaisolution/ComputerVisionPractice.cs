@@ -4,12 +4,17 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
+using System.Net.Sockets;
 
+// Analyse/Classify Image
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision;
 using Microsoft.Azure.CognitiveServices.Vision.ComputerVision.Models;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
-using System.Drawing;
-using System.Net.Sockets;
+
+// Face Detection
+using Microsoft.Azure.CognitiveServices.Vision.Face;
+using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace azureaisolution
 {
@@ -17,6 +22,7 @@ namespace azureaisolution
     {
         private static Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials? credentials;
         private static ComputerVisionClient? computerVisionClient;
+        private static FaceClient? facePredictionClient;
         private static CustomVisionPredictionClient predictionClient;
         private static int thumbNailCount = 1;
 
@@ -217,8 +223,6 @@ namespace azureaisolution
             }
         }
 
-
-
         public static async Task DetectObjectsForImageAsync(string predictionEndPoint, string predictionKey,
             Guid projectId, string modelName)
         {
@@ -274,6 +278,89 @@ namespace azureaisolution
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+        }
+
+
+        public static async Task DetectFacePredictionAsync(string predictionEndPoint, string predictionKey)
+        {
+            // Authenticate a client for the prediction API
+            facePredictionClient = new FaceClient(new
+                Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction
+                .ApiKeyServiceClientCredentials(predictionKey))
+            {
+                Endpoint = predictionEndPoint
+            };
+
+            // Specify facial features to be retrieved
+            List<FaceAttributeType?> features = new List<FaceAttributeType?>
+            {
+                FaceAttributeType.Occlusion,
+                FaceAttributeType.Blur,
+                FaceAttributeType.Glasses,
+                //FaceAttributeType.Emotion,
+                //FaceAttributeType.HeadPose,
+                //FaceAttributeType.Age,
+                //FaceAttributeType.Gender,
+                //FaceAttributeType.Smile
+            };
+
+
+            string folderPath = @"assets\facedetection";
+            string[] files = Directory.GetFiles(folderPath);
+            foreach (var imageFile in files)
+            {
+                try
+                {
+                    // Get faces
+                    using (var imageData = File.OpenRead(imageFile))
+                    {
+                        var detected_faces = await facePredictionClient.Face.DetectWithStreamAsync(imageData, returnFaceAttributes: features, returnFaceId: false);
+
+                        if (detected_faces.Count > 0)
+                        {
+                            Console.WriteLine($"{detected_faces.Count} faces detected.");
+
+                            // Prepare image for drawing
+                            Image image = Image.FromFile(imageFile);
+                            Graphics graphics = Graphics.FromImage(image);
+                            Pen pen = new Pen(Color.LightGreen, 3);
+                            Font font = new Font("Arial", 4);
+                            SolidBrush brush = new SolidBrush(Color.Black);
+                            int faceCount = 0;
+
+                            // Draw and annotate each face
+                            foreach (var face in detected_faces)
+                            {
+                                faceCount++;
+                                Console.WriteLine($"\n \tFace number {faceCount}");
+
+                                // Get face properties
+                                Console.WriteLine($"\n \t\t - Mouth Occluded: {face.FaceAttributes.Occlusion.MouthOccluded}");
+                                Console.WriteLine($"\n \t\t - Eye Occluded: {face.FaceAttributes.Occlusion.EyeOccluded}");
+                                Console.WriteLine($"\n \t\t - Blur: {face.FaceAttributes.Blur.BlurLevel}");
+                                Console.WriteLine($"\n \t\t - Glasses: {face.FaceAttributes.Glasses}");
+
+                                // Draw and annotate face
+                                var r = face.FaceRectangle;
+                                Rectangle rect = new Rectangle(r.Left, r.Top, r.Width, r.Height);
+                                graphics.DrawRectangle(pen, rect);
+                                string annotation = $"Face ID: {face.FaceId}";
+                                graphics.DrawString(annotation, font, brush, r.Left, r.Top);
+                            }
+
+                            // Save annotated image
+                            String output_file = $"{faceCount}detected_faces.jpg";
+                            image.Save(output_file);
+                            Console.WriteLine("\n \t\tResults saved in " + output_file);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
             }
         }
     }

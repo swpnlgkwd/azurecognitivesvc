@@ -24,6 +24,10 @@ namespace azureaisolution
         private static string? detectObjectModelName;
         private static Guid detectObjectProjectID;
 
+        // Configuration for Face API
+        private static string? faceAPIEndpoint;
+        private static string? faceAPIKey;
+
 
 
         static async Task Main(string[] args)
@@ -34,7 +38,6 @@ namespace azureaisolution
 
             if (region != null && cogSvcEndpoint != null && cogSvcKey != null)
             {
-
                 while (true)
                 {
 
@@ -78,6 +81,8 @@ namespace azureaisolution
                             Console.WriteLine("1. Analyze Images");
                             Console.WriteLine("2. Classify Image");
                             Console.WriteLine("3. Detect Object");
+                            Console.WriteLine("4. Face Detection");
+                            Console.WriteLine();
 
 
                             int computerVisionCapability = Convert.ToInt32(Console.ReadLine());
@@ -97,6 +102,10 @@ namespace azureaisolution
                                     Console.WriteLine("You Selected : Detect Object");
                                     await ComputerVisionPractice.DetectObjectsForImageAsync(detectObjectPredictionEndpoint,
                                         detectObjectPredictionKey, detectObjectProjectID, detectObjectModelName);
+                                    break;
+                                case 4:
+                                    Console.WriteLine("You Selected : Face Detection");
+                                    await ComputerVisionPractice.DetectFacePredictionAsync(faceAPIEndpoint,faceAPIKey);
                                     break;
                                 default:
                                     Console.WriteLine("Please enter valid number");
@@ -125,20 +134,28 @@ namespace azureaisolution
         {
             IConfigurationBuilder builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
             IConfigurationRoot configuration = builder.Build();
+
+            // General Configuration to connect to Cognitive Service
             cogSvcEndpoint = configuration["CognitiveServiceEndpoint"];
             cogSvcKey = configuration["CognitiveServiceKey"];
             region = configuration["CognitiveServiceRegion"];
 
-            // Configuration of Custom Vision
+            // Configuration of Custom Vision for Classify Images
             classifyImagePredictionEndpoint = configuration["ClassifyImagePredictionEndpoint"];
             classifyImagePredictionKey = configuration["ClassifyImagePredictionKey"];
             classifyImageProjectID = Guid.Parse(configuration["ClassifyImageProjectId"]);
             classifyImageModelName = configuration["ClassifyImageModelName"];
 
+            // Configuration of Custom Vision for Detecting Object within Image
             detectObjectPredictionEndpoint = configuration["DetectObjectPredictionEndpoint"];
             detectObjectPredictionKey = configuration["DetectObjectPredictionKey"];
             detectObjectProjectID = Guid.Parse(configuration["DetectObjectProjectId"]);
             detectObjectModelName = configuration["DetectObjectModelName"];
+
+            // Configuration for Face API
+            faceAPIEndpoint =  configuration["FaceAPIEndpoint"];
+            faceAPIKey = configuration["FaceAPIKey"];
+
 
         }
 
