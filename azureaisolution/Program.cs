@@ -28,6 +28,14 @@ namespace azureaisolution
         private static string? faceAPIEndpoint;
         private static string? faceAPIKey;
 
+        // Configuration for Form Recognizer API
+        private static string? formAPIKey;
+        private static string? formAPIEndpoint;
+        private static string? storageSasUri;
+        private static string? formModelId;
+
+
+
 
 
         static async Task Main(string[] args)
@@ -42,8 +50,9 @@ namespace azureaisolution
                 {
 
                     Console.WriteLine("Select Service to use - ");
-                    Console.WriteLine("1. Speech Service");
-                    Console.WriteLine("2. Computer Vision Service");
+                    Console.WriteLine("\t1. Speech Service");
+                    Console.WriteLine("\t2. Computer Vision Service");
+                    Console.WriteLine("\t3. Form Recognizer");
                     int serviceType = Convert.ToInt32(Console.ReadLine());
                     switch (serviceType)
                     {
@@ -78,10 +87,11 @@ namespace azureaisolution
                             Console.WriteLine();
 
                             Console.WriteLine("Select Computer Vision Capability - ");
-                            Console.WriteLine("1. Analyze Images");
-                            Console.WriteLine("2. Classify Image");
-                            Console.WriteLine("3. Detect Object");
-                            Console.WriteLine("4. Face Detection");
+                            Console.WriteLine("\t 1. Analyze Images");
+                            Console.WriteLine("\t 2. Classify Image");
+                            Console.WriteLine("\t 3. Detect Object");
+                            Console.WriteLine("\t 4. Face Detection");
+                            Console.WriteLine("\t 5. Optical Character Recognition");
                             Console.WriteLine();
 
 
@@ -90,22 +100,53 @@ namespace azureaisolution
                             switch (computerVisionCapability)
                             {
                                 case 1:
-                                    Console.WriteLine("You Selected : Analyzing Images");
+                                    Console.WriteLine("\n \tYou Selected : Analyzing Images");
                                     await ComputerVisionPractice.AnalyseImage(cogSvcKey, cogSvcEndpoint);
                                     break;
                                 case 2:
-                                    Console.WriteLine("You Selected : Classify Image");
+                                    Console.WriteLine("\n \tYou Selected : Classify Image");
                                     await ComputerVisionPractice.GetPredictionsForImageAsync(classifyImagePredictionEndpoint,
                                         classifyImagePredictionKey, classifyImageProjectID, classifyImageModelName);
                                     break;
                                 case 3:
-                                    Console.WriteLine("You Selected : Detect Object");
+                                    Console.WriteLine("\n \tYou Selected : Detect Object");
                                     await ComputerVisionPractice.DetectObjectsForImageAsync(detectObjectPredictionEndpoint,
                                         detectObjectPredictionKey, detectObjectProjectID, detectObjectModelName);
                                     break;
                                 case 4:
-                                    Console.WriteLine("You Selected : Face Detection");
+                                    Console.WriteLine("\n \tYou Selected : Face Detection");
                                     await ComputerVisionPractice.DetectFacePredictionAsync(faceAPIEndpoint,faceAPIKey);
+                                    break;
+                                case 5:
+                                    Console.WriteLine("\n \tYou Selected : Optical Character Recognition");
+                                    await ComputerVisionPractice.ReadTextOCR(cogSvcEndpoint, cogSvcKey);
+                                    break;                                        
+
+                                default:
+                                    Console.WriteLine("\n \tPlease enter valid number");
+                                    break;
+                            }
+                            break;
+
+                        case 3:
+                            Console.WriteLine("You Selected :Form Recognizer Service...");
+                            Console.WriteLine();
+
+                            Console.WriteLine("Select what you want to  - ");
+                            Console.WriteLine("1. Train Model");
+                            Console.WriteLine("2. Test Model");
+
+                            int type = Convert.ToInt32(Console.ReadLine());
+
+                            switch (type)
+                            {
+                                case 1:
+                                    Console.WriteLine("You Selected - Train Model");
+                                    await FormRecognizerPractice.TrainModelFormRecognize(formAPIEndpoint,formAPIKey,storageSasUri);
+                                    break;
+                                case 2:
+                                    Console.WriteLine("You Selected - Test Model");
+                                    await FormRecognizerPractice.TestModelFormRecognize(formAPIEndpoint,formAPIKey,formModelId);
                                     break;
                                 default:
                                     Console.WriteLine("Please enter valid number");
@@ -114,11 +155,11 @@ namespace azureaisolution
                             break;
 
                         default:
-                            Console.WriteLine("Please enter valid Service");
+                            Console.WriteLine("\n \tPlease enter valid Service");
                             break;
                     }
 
-                    Console.Write("Do you want to continue? (yes/no): ");
+                    Console.Write("\n \tDo you want to continue? (yes/no): ");
                     string userInput = Console.ReadLine();
                     if (userInput.Equals("no", StringComparison.OrdinalIgnoreCase))
                     {
@@ -156,7 +197,11 @@ namespace azureaisolution
             faceAPIEndpoint =  configuration["FaceAPIEndpoint"];
             faceAPIKey = configuration["FaceAPIKey"];
 
-
+            // Configuration for Form Recognizer API
+            formAPIKey = configuration["formAPIKey"];
+            formAPIEndpoint = configuration["formAPIEndpoint"];
+            storageSasUri = configuration["storageSasUri"];
+            formModelId = configuration["formModelId"];
         }
 
         private static void DisplayConfigurationValues()

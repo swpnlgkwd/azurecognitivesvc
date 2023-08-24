@@ -217,7 +217,7 @@ namespace azureaisolution
                 {
                     if (prediction.Probability > 0.5)
                     {
-                        Console.WriteLine($"{prediction.TagName} ({prediction.Probability:P1})");
+                        Console.WriteLine($"\n \t \t{prediction.TagName} ({prediction.Probability:P1})");
                     }
                 }
             }
@@ -280,7 +280,6 @@ namespace azureaisolution
                 Console.WriteLine(ex.Message);
             }
         }
-
 
         public static async Task DetectFacePredictionAsync(string predictionEndPoint, string predictionKey)
         {
@@ -362,6 +361,73 @@ namespace azureaisolution
                 }
 
             }
+        }
+
+
+        public static async Task ReadTextOCR(string cogSvcKey, string endPoint)
+        {
+            // Authenticate Client
+            credentials = new Microsoft.Azure.CognitiveServices.Vision.ComputerVision.ApiKeyServiceClientCredentials(cogSvcKey);
+            computerVisionClient = new ComputerVisionClient(credentials)
+            {
+                Endpoint = endPoint
+            };
+ 
+            try
+            {
+                string folderPath = @"assets\ocr";
+                string[] files = Directory.GetFiles(folderPath);
+                foreach (string filePath in files)
+                {
+                    Console.WriteLine($"\n\n \t FilePath - {filePath}");
+
+                    using (var imageData = File.OpenRead(filePath))
+                    {
+                        var textHeaders = await computerVisionClient.ReadInStreamAsync(imageData, null, null, "2022-04-30");
+
+
+                        // Get the Operation ID
+                        // After the request, get the operation location (operation ID)
+                        string operationLocation = textHeaders.OperationLocation;
+                        Thread.Sleep(2000);
+
+                        // Retrieve the URI where the extracted text will be stored from the Operation-Location header.
+                        // We only need the ID and not the full URL
+                        const int numberOfCharsInOperationId = 36;
+                        string operationId = operationLocation.Substring(operationLocation.Length - numberOfCharsInOperationId);
+                        // Extract the text
+                        ReadOperationResult results;
+
+                        Console.WriteLine();
+                        do
+                        {
+                            results = await computerVisionClient.GetReadResultAsync(Guid.Parse(operationId));
+                        }
+                        while ((results.Status == OperationStatusCodes.Running ||
+                            results.Status == OperationStatusCodes.NotStarted));
+
+                        // Display the found text.
+                        Console.WriteLine();
+                        var textUrlFileResults = results.AnalyzeResult.ReadResults;
+                        foreach (ReadResult page in textUrlFileResults)
+                        {
+                            foreach (Line line in page.Lines)
+                            {
+                                Console.WriteLine(line.Text);
+                            }
+                        }
+                        Console.WriteLine();
+
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+
         }
     }
 }
